@@ -17,6 +17,8 @@ export default function NewProductPage() {
     category: "ZAPATOS",
   });
 
+  const [curveColor, setCurveColor] = useState("Negro");
+
   const [variants, setVariants] = useState(
     [35, 36, 37, 38, 39, 40].map(size => ({ size: size.toString(), color: "Negro", stock: "0" }))
   );
@@ -28,7 +30,7 @@ export default function NewProductPage() {
   const addColorCurve = () => {
     const newVariants = [35, 36, 37, 38, 39, 40].map(size => ({
       size: size.toString(),
-      color: "Negro",
+      color: curveColor || "Negro",
       stock: "0"
     }));
     setVariants([...variants, ...newVariants]);
@@ -175,14 +177,23 @@ export default function NewProductPage() {
         <div className="border-t border-gray-100 pt-8">
           <div className="flex justify-between items-center mb-4">
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Talles, Colores y Stock</label>
-            <div className="flex gap-4">
-              <button 
-                type="button" 
-                onClick={addColorCurve}
-                className="text-xs uppercase tracking-widest font-bold text-[#c9b07c] hover:text-black flex items-center gap-1 transition-colors"
-              >
-                <Plus className="w-4 h-4" /> Curva 35 al 40
-              </button>
+            <div className="flex gap-4 items-center">
+              <div className="flex items-center border border-[#c9b07c] rounded overflow-hidden">
+                <input 
+                  type="text" 
+                  value={curveColor}
+                  onChange={e => setCurveColor(e.target.value)}
+                  className="w-24 text-xs px-2 py-2 outline-none"
+                  placeholder="Color..."
+                />
+                <button 
+                  type="button" 
+                  onClick={addColorCurve}
+                  className="text-xs uppercase tracking-widest font-bold bg-[#c9b07c] text-white hover:bg-black px-3 py-2 flex items-center gap-1 transition-colors"
+                >
+                  <Plus className="w-3 h-3" /> Añadir Curva
+                </button>
+              </div>
               <button 
                 type="button" 
                 onClick={addVariant}
