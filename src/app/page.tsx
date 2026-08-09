@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, CheckCircle2, ChevronRight, Lock, Star } from "lucide-react";
+import Link from "next/link";
 
 type Stage = "START" | "QUIZ" | "EMAIL" | "RESULT" | "VSL" | "SALES_PAGE";
 
@@ -15,7 +16,6 @@ export default function FunnelPage() {
   const [isWholesale, setIsWholesale] = useState(false);
 
   // Fetch real products from DB
-  import { useEffect } from "react";
   useEffect(() => {
     fetch("/api/products")
       .then(res => res.json())
