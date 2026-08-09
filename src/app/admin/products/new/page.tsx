@@ -76,13 +76,16 @@ export default function NewProductPage() {
         }),
       });
 
-      if (res.ok) {
-        router.push("/admin/products");
-        router.refresh();
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Error de Base de Datos: ${errorText}`);
       }
-    } catch (error) {
+
+      router.push("/admin/products");
+      router.refresh();
+    } catch (error: any) {
       console.error(error);
-      alert("Hubo un error al guardar el producto.");
+      alert(`Hubo un error al guardar el producto: ${error.message}`);
     } finally {
       setLoading(false);
     }
