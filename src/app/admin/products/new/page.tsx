@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Upload, Loader2, Plus, Trash2 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
+import imageCompression from "browser-image-compression";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -57,13 +58,33 @@ export default function NewProductPage() {
       let images: string[] = [];
 
       if (files.length > 0) {
-        // Upload multiple files in parallel
-        const uploadPromises = files.map(file => 
-          upload(file.name, file, {
-            access: 'public',
-            handleUploadUrl: '/api/upload',
-          })
-        );
+        // Upload multiple files in parallel WITH compression
+        const uploadPromises = files.map(async (file) => {
+          // Compression options
+          const options = {
+            maxSizeMB: 0.5, // 500KB max
+            maxWidthOrHeight: 1920,
+            useWebWorker: true
+          };
+          
+          try {
+            // Compress the image before uploading
+            const compressedFile = await imageCompression(file, options);
+            
+            return upload(compressedFile.name, compressedFile, {
+              access: 'public',
+              handleUploadUrl: '/api/upload',
+            });
+          } catch (error) {
+            console.error("Error comprimiendo imagen:", error);
+            // Fallback to original if compression fails for some reason
+            return upload(file.name, file, {
+              access: 'public',
+              handleUploadUrl: '/api/upload',
+            });
+          }
+        });
+        
         const blobs = await Promise.all(uploadPromises);
         images = blobs.map(b => b.url);
         // Set the first image as the main imageUrl for backward compatibility
