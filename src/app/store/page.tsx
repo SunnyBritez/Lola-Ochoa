@@ -41,6 +41,7 @@ export default async function StoreFront() {
               <Link href="#" className="text-gray-900 hover:text-[#c9b07c] transition-colors">Nueva Colección</Link>
               <Link href="#" className="hover:text-[#c9b07c] transition-colors">Calzado</Link>
               <Link href="#" className="hover:text-[#c9b07c] transition-colors">Ropa & Carteras</Link>
+              <Link href="/contacto" className="hover:text-[#c9b07c] transition-colors">Contacto</Link>
               <Link href="#" className="text-red-700 hover:text-red-900 transition-colors">Sale</Link>
             </nav>
           </div>
@@ -231,9 +232,9 @@ export default async function StoreFront() {
           
           <div className="col-span-1 md:col-span-1">
             <h3 className="text-xl tracking-[0.2em] font-light uppercase mb-6">Lola Ochoa</h3>
-            <p className="text-gray-500 mb-4">Zapatos de autor. Cuero legítimo.</p>
-            <p className="text-gray-500 font-semibold mb-1">WhatsApp: +54 9 11 XXXX-XXXX</p>
-            <p className="text-gray-500">hola@lolaochoa.com.ar</p>
+            <p className="text-gray-500 mb-2">Tienda online 24/7. No tenemos local.</p>
+            <p className="text-gray-500 font-semibold mb-1">WhatsApp: 1169486697</p>
+            <p className="text-gray-500">solopediosdelola@gmail.com</p>
           </div>
 
           <div>
