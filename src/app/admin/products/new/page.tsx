@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Plus, Trash2 } from "lucide-react";
 import type { put } from "@vercel/blob";
 
 export default function NewProductPage() {
@@ -15,8 +15,23 @@ export default function NewProductPage() {
     description: "",
     price: "",
     category: "ZAPATOS",
-    stock: "10",
   });
+
+  const [variants, setVariants] = useState([{ size: "38", color: "Negro", stock: "10" }]);
+
+  const addVariant = () => {
+    setVariants([...variants, { size: "", color: "", stock: "0" }]);
+  };
+
+  const updateVariant = (index: number, field: string, value: string) => {
+    const newVariants = [...variants];
+    newVariants[index] = { ...newVariants[index], [field]: value };
+    setVariants(newVariants);
+  };
+
+  const removeVariant = (index: number) => {
+    setVariants(variants.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +40,6 @@ export default function NewProductPage() {
     try {
       let imageUrl = null;
 
-      // 1. Upload image to Vercel Blob if selected
       if (file) {
         const response = await fetch(`/api/upload?filename=${file.name}`, {
           method: 'POST',
@@ -35,14 +49,17 @@ export default function NewProductPage() {
         imageUrl = blob.url;
       }
 
-      // 2. Save product to Database
+      // Calcular stock total sumando todas las variantes
+      const totalStock = variants.reduce((acc, curr) => acc + parseInt(curr.stock || "0"), 0);
+
       const res = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
           price: parseFloat(formData.price),
-          stock: parseInt(formData.stock),
+          stock: totalStock,
+          variants,
           imageUrl,
         }),
       });
@@ -60,14 +77,14 @@ export default function NewProductPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto pb-20">
       <h2 className="text-2xl font-serif text-gray-900 mb-6">Subir Nuevo Producto</h2>
       
-      <form onSubmit={handleSubmit} className="bg-white p-8 border border-gray-100 shadow-sm rounded-lg space-y-6">
+      <form onSubmit={handleSubmit} className="bg-white p-8 border border-gray-100 shadow-sm rounded-lg space-y-8">
         
         {/* FOTO */}
         <div>
-          <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Foto del Producto (Alta Calidad)</label>
+          <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Foto del Producto</label>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center hover:bg-gray-50 transition-colors cursor-pointer relative">
             <input 
               type="file" 
@@ -82,7 +99,7 @@ export default function NewProductPage() {
               <div className="text-gray-500 flex flex-col items-center">
                 <Upload className="w-8 h-8 mb-3 text-gray-400" />
                 <p>Hacé clic acá para seleccionar la foto desde tu compu</p>
-                <p className="text-xs mt-1">Formato JPG o PNG.</p>
+                <p className="text-xs mt-1">Se recortará automáticamente al tamaño de la web.</p>
               </div>
             )}
           </div>
@@ -134,7 +151,7 @@ export default function NewProductPage() {
 
         {/* DESCRIPCION */}
         <div>
-          <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Descripción (Para la web)</label>
+          <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Descripción</label>
           <textarea 
             rows={4}
             value={formData.description}
@@ -144,15 +161,66 @@ export default function NewProductPage() {
           ></textarea>
         </div>
 
+        {/* VARIANTES (TALLES Y COLORES) */}
+        <div className="border-t border-gray-100 pt-8">
+          <div className="flex justify-between items-center mb-4">
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Talles, Colores y Stock</label>
+            <button 
+              type="button" 
+              onClick={addVariant}
+              className="text-xs uppercase tracking-widest font-bold text-[#c9b07c] hover:text-black flex items-center gap-1 transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Agregar Talle/Color
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            {variants.map((variant, index) => (
+              <div key={index} className="flex gap-3 items-center bg-gray-50 p-3 border border-gray-200">
+                <input 
+                  type="text" 
+                  placeholder="Talle (ej: 38)" 
+                  required
+                  value={variant.size}
+                  onChange={e => updateVariant(index, 'size', e.target.value)}
+                  className="flex-1 border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#c9b07c]"
+                />
+                <input 
+                  type="text" 
+                  placeholder="Color (ej: Negro)" 
+                  required
+                  value={variant.color}
+                  onChange={e => updateVariant(index, 'color', e.target.value)}
+                  className="flex-1 border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#c9b07c]"
+                />
+                <input 
+                  type="number" 
+                  placeholder="Stock" 
+                  required
+                  min="0"
+                  value={variant.stock}
+                  onChange={e => updateVariant(index, 'stock', e.target.value)}
+                  className="w-24 border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#c9b07c]"
+                />
+                {variants.length > 1 && (
+                  <button type="button" onClick={() => removeVariant(index)} className="text-gray-400 hover:text-red-600 p-2">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
         <button 
           type="submit" 
           disabled={loading}
           className="w-full bg-[#1a1a1a] hover:bg-black text-white py-4 font-bold tracking-widest uppercase flex items-center justify-center gap-3 transition-colors disabled:opacity-50"
         >
           {loading ? (
-            <><Loader2 className="w-5 h-5 animate-spin" /> Guardando en Base de Datos...</>
+            <><Loader2 className="w-5 h-5 animate-spin" /> Guardando...</>
           ) : (
-            "Guardar Producto y Publicar"
+            "Guardar Zapato y Publicar"
           )}
         </button>
       </form>
