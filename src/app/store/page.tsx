@@ -1,10 +1,14 @@
 import Link from "next/link";
 import { Search, ShoppingBag, User, ArrowRight, Menu, Star, Package } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
 export default async function StoreFront() {
+  const cookieStore = cookies();
+  const isWholesale = cookieStore.get("wholesale_mode")?.value === "true";
+
   // Fetch real products from DB
   const products = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },
@@ -14,9 +18,15 @@ export default async function StoreFront() {
     <div className="min-h-screen bg-[#FDFBF7] text-gray-900 font-sans selection:bg-[#c9b07c] selection:text-white">
       
       {/* 1. TOP BAR (Anuncios) */}
-      <div className="w-full bg-[#1a1a1a] text-white text-[10px] md:text-xs py-2 uppercase tracking-[0.2em] text-center font-bold">
-        Envío gratis a todo el país • 25% OFF Transferencia • 6 Cuotas sin interés
-      </div>
+      {isWholesale ? (
+        <div className="w-full bg-[#c9b07c] text-black text-[10px] md:text-xs py-2 uppercase tracking-[0.2em] text-center font-bold">
+          MODO MAYORISTA ACTIVO • ESTÁS VIENDO PRECIOS EXCLUSIVOS
+        </div>
+      ) : (
+        <div className="w-full bg-[#1a1a1a] text-white text-[10px] md:text-xs py-2 uppercase tracking-[0.2em] text-center font-bold">
+          Envío gratis a todo el país • 25% OFF Transferencia • 6 Cuotas sin interés
+        </div>
+      )}
 
       {/* 1. HEADER LIMPIO */}
       <header className="w-full bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm relative">
@@ -170,13 +180,22 @@ export default async function StoreFront() {
             ) : (
               products.map((product) => (
                 <Link href="#" key={product.id} className="group block cursor-pointer">
-                  <div className="aspect-[4/5] bg-gray-100 mb-4 overflow-hidden relative">
+                  <div className="aspect-[4/5] bg-gray-100 mb-4 overflow-hidden relative group-hover:shadow-lg transition-all">
                     {product.imageUrl ? (
-                      <img 
-                        src={product.imageUrl} 
-                        alt={product.name} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+                      <>
+                        <img 
+                          src={product.imageUrl} 
+                          alt={product.name} 
+                          className={`w-full h-full object-cover transition-opacity duration-500 ${product.images.length > 1 ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
+                        />
+                        {product.images.length > 1 && (
+                          <img 
+                            src={product.images[1]} 
+                            alt={`${product.name} detalle`} 
+                            className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-105"
+                          />
+                        )}
+                      </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-gray-300">
                         <Package className="w-8 h-8" />
@@ -185,7 +204,12 @@ export default async function StoreFront() {
                   </div>
                   <h3 className="font-serif text-lg mb-1 group-hover:text-[#c9b07c] transition-colors">{product.name}</h3>
                   <div className="flex items-center gap-3">
-                    {product.salePrice ? (
+                    {isWholesale && product.wholesalePrice ? (
+                      <>
+                        <span className="text-gray-400 line-through text-xs">${product.price.toLocaleString("es-AR")}</span>
+                        <span className="font-semibold text-[#c9b07c]">${product.wholesalePrice.toLocaleString("es-AR")}</span>
+                      </>
+                    ) : product.salePrice ? (
                       <>
                         <span className="text-gray-400 line-through text-xs">${product.price.toLocaleString("es-AR")}</span>
                         <span className="font-semibold text-gray-900">${product.salePrice.toLocaleString("es-AR")}</span>

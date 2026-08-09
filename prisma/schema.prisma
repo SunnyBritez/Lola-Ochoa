@@ -10,10 +10,13 @@ model Product {
   id          String   @id @default(cuid())
   name        String
   description String?
-  price       Float
-  salePrice   Float?
-  imageUrl    String?
-  category    String   @default("ZAPATOS")
+  price          Float
+  costPrice      Float?
+  wholesalePrice Float?
+  salePrice      Float?
+  imageUrl       String?
+  images         String[] @default([])
+  category       String   @default("ZAPATOS")
   stock       Int      @default(0) // Stock general (opcional si usamos variants)
   variants    Json?    // Guarda array de { size: '36', color: 'Negro', stock: 5 }
   isLook      Boolean  @default(false)

@@ -12,6 +12,7 @@ export default function FunnelPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [products, setProducts] = useState<any[]>([]);
+  const [isWholesale, setIsWholesale] = useState(false);
 
   // Fetch real products from DB
   import { useEffect } from "react";
@@ -20,6 +21,8 @@ export default function FunnelPage() {
       .then(res => res.json())
       .then(data => setProducts(data.slice(0, 2)))
       .catch(err => console.error(err));
+
+    setIsWholesale(document.cookie.includes("wholesale_mode=true"));
   }, []);
 
   const questions = [
@@ -285,11 +288,16 @@ export default function FunnelPage() {
             <div className="grid md:grid-cols-2 gap-8 mb-16">
               {products.length > 0 ? products.map((product) => (
                 <div key={product.id} className="bg-white border border-gray-100 shadow-sm p-6 flex flex-col">
-                  <div className="aspect-[4/5] bg-gray-100 mb-6 flex items-center justify-center text-gray-400 relative overflow-hidden group">
+                  <div className="aspect-[4/5] bg-gray-100 mb-6 flex items-center justify-center text-gray-400 relative overflow-hidden group-hover:shadow-lg transition-all">
                      {product.isLook && <div className="absolute top-4 left-4 bg-[#c9b07c] text-white text-xs px-3 py-1 font-bold tracking-widest uppercase z-10">Nuevo Total Look</div>}
                      {!product.isLook && <div className="absolute top-4 left-4 bg-black text-white text-xs px-3 py-1 font-bold tracking-widest uppercase z-10">Más Vendido</div>}
                      {product.imageUrl ? (
-                       <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                       <>
+                         <img src={product.imageUrl} alt={product.name} className={`w-full h-full object-cover transition-opacity duration-700 ${product.images?.length > 1 ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`} />
+                         {product.images?.length > 1 && (
+                           <img src={product.images[1]} alt={`${product.name} detalle`} className="w-full h-full object-cover absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 scale-105" />
+                         )}
+                       </>
                      ) : (
                        <span>FOTO PRODUCTO</span>
                      )}
@@ -298,7 +306,12 @@ export default function FunnelPage() {
                   <p className="text-gray-500 mb-4 text-sm leading-relaxed">{product.description || "Cuero genuino, taco de descanso perfecto para usar de 8 am a 8 pm sin dolor."}</p>
                   <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
                     <div>
-                      {product.salePrice ? (
+                      {isWholesale && product.wholesalePrice ? (
+                        <>
+                          <div className="text-sm text-gray-400 line-through">${product.price.toLocaleString("es-AR")}</div>
+                          <div className="text-xl font-bold text-[#c9b07c]">${product.wholesalePrice.toLocaleString("es-AR")} <span className="text-xs font-normal text-black ml-1">MAYORISTA</span></div>
+                        </>
+                      ) : product.salePrice ? (
                         <>
                           <div className="text-sm text-gray-400 line-through">${product.price.toLocaleString("es-AR")}</div>
                           <div className="text-xl font-bold text-gray-900">${product.salePrice.toLocaleString("es-AR")} <span className="text-xs font-normal text-green-600">-25% Transferencia</span></div>

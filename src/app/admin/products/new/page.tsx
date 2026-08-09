@@ -8,12 +8,14 @@ import { upload } from "@vercel/blob/client";
 export default function NewProductPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     price: "",
+    costPrice: "",
+    wholesalePrice: "",
     category: "ZAPATOS",
   });
 
@@ -52,13 +54,20 @@ export default function NewProductPage() {
 
     try {
       let imageUrl = null;
+      let images: string[] = [];
 
-      if (file) {
-        const newBlob = await upload(file.name, file, {
-          access: 'public',
-          handleUploadUrl: '/api/upload',
-        });
-        imageUrl = newBlob.url;
+      if (files.length > 0) {
+        // Upload multiple files in parallel
+        const uploadPromises = files.map(file => 
+          upload(file.name, file, {
+            access: 'public',
+            handleUploadUrl: '/api/upload',
+          })
+        );
+        const blobs = await Promise.all(uploadPromises);
+        images = blobs.map(b => b.url);
+        // Set the first image as the main imageUrl for backward compatibility
+        imageUrl = images[0];
       }
 
       // Calcular stock total sumando todas las variantes
@@ -70,9 +79,12 @@ export default function NewProductPage() {
         body: JSON.stringify({
           ...formData,
           price: parseFloat(formData.price),
+          costPrice: formData.costPrice ? parseFloat(formData.costPrice) : undefined,
+          wholesalePrice: formData.wholesalePrice ? parseFloat(formData.wholesalePrice) : undefined,
           stock: totalStock,
           variants,
           imageUrl,
+          images,
         }),
       });
 
@@ -100,24 +112,27 @@ export default function NewProductPage() {
         {/* FOTO */}
         <div>
           <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Foto del Producto</label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center hover:bg-gray-50 transition-colors cursor-pointer relative">
-            <input 
-              type="file" 
-              accept="image/*"
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              onChange={(e) => setFile(e.target.files?.[0] || null)}
-              required
-            />
-            {file ? (
-              <div className="text-green-600 font-medium">{file.name} (Lista para subir)</div>
-            ) : (
-              <div className="text-gray-500 flex flex-col items-center">
-                <Upload className="w-8 h-8 mb-3 text-gray-400" />
-                <p>Hacé clic acá para seleccionar la foto desde tu compu</p>
-                <p className="text-xs mt-1">Se recortará automáticamente al tamaño de la web.</p>
-              </div>
-            )}
-          </div>
+            <div className="border-2 border-dashed border-gray-200 p-8 text-center flex flex-col items-center justify-center relative hover:border-[#c9b07c] transition-colors cursor-pointer bg-white">
+              <input 
+                type="file" 
+                multiple
+                accept="image/*"
+                onChange={e => {
+                  if (e.target.files) {
+                    setFiles(Array.from(e.target.files));
+                  }
+                }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              <Upload className="w-8 h-8 text-gray-300 mb-3" />
+              <p className="text-sm font-bold text-gray-700">Subir Galería de Fotos</p>
+              <p className="text-xs text-gray-500 mt-1">Arrastrá tus fotos o hacé clic acá</p>
+              {files.length > 0 && (
+                <div className="mt-4 p-2 bg-[#FDFBF7] text-[#c9b07c] text-xs font-bold border border-[#c9b07c]">
+                  {files.length} fotos seleccionadas
+                </div>
+              )}
+            </div>
         </div>
 
         {/* NOMBRE */}
@@ -133,20 +148,42 @@ export default function NewProductPage() {
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-6">
-          {/* PRECIO */}
+        <div className="grid grid-cols-3 gap-6">
           <div>
-            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Precio de Venta ($)</label>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Precio Costo ($)</label>
             <input 
-              type="number" 
-              required
+              type="number"
               min="0"
-              value={formData.price}
-              onChange={e => setFormData({...formData, price: e.target.value})}
-              className="w-full border border-gray-300 p-3 focus:outline-none focus:border-[#c9b07c]"
-              placeholder="150000"
+              value={formData.costPrice}
+              onChange={e => setFormData({ ...formData, costPrice: e.target.value })}
+              className="w-full border border-gray-200 p-4 focus:outline-none focus:border-[#c9b07c] text-sm"
+              placeholder="50000"
             />
           </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Precio Mayorista ($)</label>
+            <input 
+              type="number"
+              min="0"
+              value={formData.wholesalePrice}
+              onChange={e => setFormData({ ...formData, wholesalePrice: e.target.value })}
+              className="w-full border border-gray-200 p-4 focus:outline-none focus:border-[#c9b07c] text-sm"
+              placeholder="70000"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Precio Público ($)</label>
+            <input 
+              type="number"
+              min="0"
+              required
+              value={formData.price}
+              onChange={e => setFormData({ ...formData, price: e.target.value })}
+              className="w-full border border-gray-200 p-4 focus:outline-none focus:border-[#c9b07c] text-sm"
+              placeholder="135000"
+            />
+          </div>
+        </div>
 
           {/* CATEGORIA */}
           <div>
