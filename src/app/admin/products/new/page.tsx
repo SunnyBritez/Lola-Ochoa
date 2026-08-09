@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Upload, Loader2, Plus, Trash2 } from "lucide-react";
-import type { put } from "@vercel/blob";
+import { upload } from "@vercel/blob/client";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -41,12 +41,11 @@ export default function NewProductPage() {
       let imageUrl = null;
 
       if (file) {
-        const response = await fetch(`/api/upload?filename=${file.name}`, {
-          method: 'POST',
-          body: file,
+        const newBlob = await upload(file.name, file, {
+          access: 'public',
+          handleUploadUrl: '/api/upload',
         });
-        const blob = await response.json();
-        imageUrl = blob.url;
+        imageUrl = newBlob.url;
       }
 
       // Calcular stock total sumando todas las variantes
