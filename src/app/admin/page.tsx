@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Package, DollarSign, TrendingUp } from "lucide-react";
+import { Plus, Package, DollarSign, TrendingUp, ShoppingCart } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminDashboard() {
@@ -13,13 +13,21 @@ export default async function AdminDashboard() {
           <h2 className="text-2xl font-serif text-gray-900">Resumen del Negocio</h2>
           <p className="text-sm text-gray-500 mt-1">Acá vas a ver cómo vienen tus ventas diarias.</p>
         </div>
-        <Link 
-          href="/admin/products/new"
-          className="bg-[#1a1a1a] hover:bg-black text-white px-5 py-2.5 text-sm uppercase tracking-widest font-bold flex items-center gap-2 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Subir Zapato Nuevo
-        </Link>
+        <div className="flex gap-4">
+          <Link 
+            href="/admin/products"
+            className="bg-white border border-gray-200 hover:border-gray-300 text-gray-700 px-5 py-2.5 text-sm uppercase tracking-widest font-bold flex items-center gap-2 transition-colors"
+          >
+            Mis Productos
+          </Link>
+          <Link 
+            href="/admin/products/new"
+            className="bg-[#1a1a1a] hover:bg-black text-white px-5 py-2.5 text-sm uppercase tracking-widest font-bold flex items-center gap-2 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Subir Zapato Nuevo
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -71,6 +79,3 @@ export default async function AdminDashboard() {
     </div>
   );
 }
-
-// Just a dummy icon since ShoppingCart wasn't imported at the top
-import { ShoppingCart } from "lucide-react";

@@ -65,12 +65,10 @@ export default async function AdminProductsPage() {
                   </td>
                   <td className="px-6 py-4 text-xs font-semibold uppercase tracking-widest text-gray-500">{product.category}</td>
                   <td className="px-6 py-4 text-right">
-                    <button className="text-gray-400 hover:text-[#c9b07c] p-2 transition-colors">
+                    <Link href={`/admin/products/${product.id}/edit`} className="inline-block text-gray-400 hover:text-[#c9b07c] p-2 transition-colors" title="Editar">
                       <Edit className="w-4 h-4" />
-                    </button>
-                    <button className="text-gray-400 hover:text-red-600 p-2 transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    </Link>
+                    {/* El botón de borrar requiere un client component o un form action, lo dejamos preparado para después si quiere borrar */}
                   </td>
                 </tr>
               ))}
