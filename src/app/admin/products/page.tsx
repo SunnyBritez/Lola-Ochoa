@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { Plus, Package, Edit, Trash2 } from "lucide-react";
+import { Plus, Edit, Package } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({
@@ -31,49 +33,58 @@ export default async function AdminProductsPage() {
             <p className="text-sm mt-1 mb-6">Tocá el botón negro de arriba para subir tu primer producto a la base de datos.</p>
           </div>
         ) : (
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-gray-500 uppercase tracking-widest text-[10px] border-b border-gray-200">
-              <tr>
-                <th className="px-6 py-4">Producto</th>
-                <th className="px-6 py-4">Precio</th>
-                <th className="px-6 py-4">Stock</th>
-                <th className="px-6 py-4">Categoría</th>
-                <th className="px-6 py-4 text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {products.map((product) => (
-                <tr key={product.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-gray-100 flex-shrink-0 border border-gray-200 overflow-hidden">
-                      {product.imageUrl ? (
-                        <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <Package className="w-5 h-5 mx-auto mt-3 text-gray-300" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-900">{product.name}</p>
-                      <p className="text-xs text-gray-500 truncate max-w-xs">{product.description}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 font-medium">${product.price.toLocaleString("es-AR")}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs rounded-full ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {product.stock > 0 ? `${product.stock} disp.` : 'Sin stock'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-xs font-semibold uppercase tracking-widest text-gray-500">{product.category}</td>
-                  <td className="px-6 py-4 text-right">
-                    <Link href={`/admin/products/${product.id}/edit`} className="inline-block text-gray-400 hover:text-[#c9b07c] p-2 transition-colors" title="Editar">
-                      <Edit className="w-4 h-4" />
-                    </Link>
-                    {/* El botón de borrar requiere un client component o un form action, lo dejamos preparado para después si quiere borrar */}
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm min-w-[800px]">
+              <thead className="bg-gray-50 text-gray-500 uppercase tracking-widest text-[10px] border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-4">Producto</th>
+                  <th className="px-6 py-4">Costo</th>
+                  <th className="px-6 py-4 text-[#c9b07c]">Mayorista</th>
+                  <th className="px-6 py-4">Público</th>
+                  <th className="px-6 py-4">Stock</th>
+                  <th className="px-6 py-4 text-right">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {products.map((product) => (
+                  <tr key={product.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 flex items-center gap-4">
+                      <div className="w-12 h-12 bg-gray-100 flex-shrink-0 border border-gray-200 overflow-hidden">
+                        {product.imageUrl ? (
+                          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <Package className="w-5 h-5 mx-auto mt-3 text-gray-300" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900">{product.name}</p>
+                        <p className="text-xs text-gray-500 truncate max-w-xs">{product.category}</p>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500 font-medium">
+                      {product.costPrice ? `$${product.costPrice.toLocaleString("es-AR")}` : "-"}
+                    </td>
+                    <td className="px-6 py-4 text-[#c9b07c] font-bold">
+                      {product.wholesalePrice ? `$${product.wholesalePrice.toLocaleString("es-AR")}` : "-"}
+                    </td>
+                    <td className="px-6 py-4 font-bold text-gray-900">
+                      ${product.price.toLocaleString("es-AR")}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 text-xs rounded-full ${product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {product.stock > 0 ? `${product.stock} disp.` : 'Sin stock'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link href={`/admin/products/${product.id}/edit`} className="inline-block text-gray-400 hover:text-[#c9b07c] p-2 transition-colors" title="Editar">
+                        <Edit className="w-4 h-4" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
