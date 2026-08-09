@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 export const dynamic = "force-dynamic";
 
 export default async function StoreFront() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const isWholesale = cookieStore.get("wholesale_mode")?.value === "true";
 
   // Fetch real products from DB

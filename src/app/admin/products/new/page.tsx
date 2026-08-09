@@ -220,7 +220,6 @@ export default function NewProductPage() {
               <option value="TOTAL_LOOK">Combo "Total Look"</option>
             </select>
           </div>
-        </div>
 
         {/* DESCRIPCION */}
         <div>
