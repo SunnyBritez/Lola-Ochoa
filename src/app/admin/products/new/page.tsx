@@ -17,10 +17,21 @@ export default function NewProductPage() {
     category: "ZAPATOS",
   });
 
-  const [variants, setVariants] = useState([{ size: "38", color: "Negro", stock: "10" }]);
+  const [variants, setVariants] = useState(
+    [35, 36, 37, 38, 39, 40].map(size => ({ size: size.toString(), color: "Negro", stock: "0" }))
+  );
 
   const addVariant = () => {
     setVariants([...variants, { size: "", color: "", stock: "0" }]);
+  };
+
+  const addColorCurve = () => {
+    const newVariants = [35, 36, 37, 38, 39, 40].map(size => ({
+      size: size.toString(),
+      color: "Negro",
+      stock: "0"
+    }));
+    setVariants([...variants, ...newVariants]);
   };
 
   const updateVariant = (index: number, field: string, value: string) => {
@@ -164,13 +175,22 @@ export default function NewProductPage() {
         <div className="border-t border-gray-100 pt-8">
           <div className="flex justify-between items-center mb-4">
             <label className="block text-xs font-bold text-gray-500 uppercase tracking-widest">Talles, Colores y Stock</label>
-            <button 
-              type="button" 
-              onClick={addVariant}
-              className="text-xs uppercase tracking-widest font-bold text-[#c9b07c] hover:text-black flex items-center gap-1 transition-colors"
-            >
-              <Plus className="w-4 h-4" /> Agregar Talle/Color
-            </button>
+            <div className="flex gap-4">
+              <button 
+                type="button" 
+                onClick={addColorCurve}
+                className="text-xs uppercase tracking-widest font-bold text-[#c9b07c] hover:text-black flex items-center gap-1 transition-colors"
+              >
+                <Plus className="w-4 h-4" /> Curva 35 al 40
+              </button>
+              <button 
+                type="button" 
+                onClick={addVariant}
+                className="text-xs uppercase tracking-widest font-bold text-gray-400 hover:text-black flex items-center gap-1 transition-colors"
+              >
+                <Plus className="w-4 h-4" /> Talle Individual
+              </button>
+            </div>
           </div>
 
           <div className="space-y-3">
