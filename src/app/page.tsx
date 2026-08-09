@@ -11,6 +11,16 @@ export default function FunnelPage() {
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [products, setProducts] = useState<any[]>([]);
+
+  // Fetch real products from DB
+  import { useEffect } from "react";
+  useEffect(() => {
+    fetch("/api/products")
+      .then(res => res.json())
+      .then(data => setProducts(data.slice(0, 2)))
+      .catch(err => console.error(err));
+  }, []);
 
   const questions = [
     {
@@ -273,43 +283,38 @@ export default function FunnelPage() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-8 mb-16">
-              {/* Product Card 1 */}
-              <div className="bg-white border border-gray-100 shadow-sm p-6 flex flex-col">
-                <div className="aspect-[4/5] bg-gray-100 mb-6 flex items-center justify-center text-gray-400 relative overflow-hidden">
-                   <div className="absolute top-4 left-4 bg-black text-white text-xs px-3 py-1 font-bold tracking-widest uppercase">Más Vendido</div>
-                   FOTO PRODUCTO
-                </div>
-                <h3 className="font-serif text-2xl mb-2">Botas Texanas de Autor</h3>
-                <p className="text-gray-500 mb-4 text-sm leading-relaxed">Cuero genuino, taco de descanso perfecto para usar de 8 am a 8 pm sin dolor. Hechas a mano en Argentina.</p>
-                <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
-                  <div>
-                    <div className="text-sm text-gray-400 line-through">$180.000</div>
-                    <div className="text-xl font-bold text-gray-900">$135.000 <span className="text-xs font-normal text-green-600">-25% Transferencia</span></div>
+              {products.length > 0 ? products.map((product) => (
+                <div key={product.id} className="bg-white border border-gray-100 shadow-sm p-6 flex flex-col">
+                  <div className="aspect-[4/5] bg-gray-100 mb-6 flex items-center justify-center text-gray-400 relative overflow-hidden group">
+                     {product.isLook && <div className="absolute top-4 left-4 bg-[#c9b07c] text-white text-xs px-3 py-1 font-bold tracking-widest uppercase z-10">Nuevo Total Look</div>}
+                     {!product.isLook && <div className="absolute top-4 left-4 bg-black text-white text-xs px-3 py-1 font-bold tracking-widest uppercase z-10">Más Vendido</div>}
+                     {product.imageUrl ? (
+                       <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                     ) : (
+                       <span>FOTO PRODUCTO</span>
+                     )}
                   </div>
-                  <a href="https://lolaochoa.com.ar/" target="_blank" rel="noopener noreferrer" className="bg-[#1a1a1a] text-white px-6 py-3 text-sm font-bold tracking-widest uppercase hover:bg-black transition-colors">
-                    COMPRAR
-                  </a>
-                </div>
-              </div>
-
-              {/* Product Card 2 */}
-              <div className="bg-white border border-gray-100 shadow-sm p-6 flex flex-col">
-                <div className="aspect-[4/5] bg-gray-100 mb-6 flex items-center justify-center text-gray-400 relative overflow-hidden">
-                   <div className="absolute top-4 left-4 bg-[#c9b07c] text-white text-xs px-3 py-1 font-bold tracking-widest uppercase">Nuevo Total Look</div>
-                   FOTO PRODUCTO (CARTERA + ROPA)
-                </div>
-                <h3 className="font-serif text-2xl mb-2">Combo Cartera + Campera</h3>
-                <p className="text-gray-500 mb-4 text-sm leading-relaxed">Elevá tus básicos. Cartera de diseño y campera de cuero a juego. El sistema infalible para salir perfecta en 5 minutos.</p>
-                <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
-                  <div>
-                    <div className="text-sm text-gray-400 line-through">$250.000</div>
-                    <div className="text-xl font-bold text-gray-900">$187.500 <span className="text-xs font-normal text-green-600">-25% Transferencia</span></div>
+                  <h3 className="font-serif text-2xl mb-2">{product.name}</h3>
+                  <p className="text-gray-500 mb-4 text-sm leading-relaxed">{product.description || "Cuero genuino, taco de descanso perfecto para usar de 8 am a 8 pm sin dolor."}</p>
+                  <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
+                    <div>
+                      {product.salePrice ? (
+                        <>
+                          <div className="text-sm text-gray-400 line-through">${product.price.toLocaleString("es-AR")}</div>
+                          <div className="text-xl font-bold text-gray-900">${product.salePrice.toLocaleString("es-AR")} <span className="text-xs font-normal text-green-600">-25% Transferencia</span></div>
+                        </>
+                      ) : (
+                        <div className="text-xl font-bold text-gray-900">${product.price.toLocaleString("es-AR")}</div>
+                      )}
+                    </div>
+                    <Link href="/store" className="bg-[#1a1a1a] text-white px-6 py-3 text-sm font-bold tracking-widest uppercase hover:bg-black transition-colors">
+                      COMPRAR
+                    </Link>
                   </div>
-                  <a href="https://lolaochoa.com.ar/" target="_blank" rel="noopener noreferrer" className="bg-[#1a1a1a] text-white px-6 py-3 text-sm font-bold tracking-widest uppercase hover:bg-black transition-colors">
-                    COMPRAR
-                  </a>
                 </div>
-              </div>
+              )) : (
+                <div className="col-span-full py-10 text-center text-gray-500">Cargando la colección exclusiva...</div>
+              )}
             </div>
 
             <div className="bg-[#FDFBF7] p-8 md:p-12 text-center border border-[#e5d5b5]">

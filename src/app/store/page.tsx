@@ -1,7 +1,13 @@
 import Link from "next/link";
-import { Search, ShoppingBag, User, ArrowRight, Menu, Star } from "lucide-react";
+import { Search, ShoppingBag, User, ArrowRight, Menu, Star, Package } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-export default function StoreFront() {
+export default async function StoreFront() {
+  // Fetch real products from DB
+  const products = await prisma.product.findMany({
+    orderBy: { createdAt: "desc" },
+    take: 8,
+  });
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-gray-900 font-sans selection:bg-[#c9b07c] selection:text-white">
       
@@ -154,18 +160,41 @@ export default function StoreFront() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((item) => (
-              <div key={item} className="group">
-                <div className="aspect-[4/5] bg-gray-100 mb-4 flex items-center justify-center text-gray-400 text-xs">
-                  [PRODUCTO {item}]
-                </div>
-                <h3 className="font-serif text-lg mb-1">Producto Clásico {item}</h3>
-                <div className="flex items-center gap-3">
-                  <span className="text-gray-400 line-through text-xs">$180.000</span>
-                  <span className="font-semibold text-gray-900">$135.000</span>
-                </div>
+            {products.length === 0 ? (
+              <div className="col-span-full py-20 text-center text-gray-400">
+                <Package className="w-10 h-10 mx-auto mb-3 opacity-20" />
+                <p>Próximamente nueva colección...</p>
               </div>
-            ))}
+            ) : (
+              products.map((product) => (
+                <Link href="#" key={product.id} className="group block cursor-pointer">
+                  <div className="aspect-[4/5] bg-gray-100 mb-4 overflow-hidden relative">
+                    {product.imageUrl ? (
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name} 
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-300">
+                        <Package className="w-8 h-8" />
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="font-serif text-lg mb-1 group-hover:text-[#c9b07c] transition-colors">{product.name}</h3>
+                  <div className="flex items-center gap-3">
+                    {product.salePrice ? (
+                      <>
+                        <span className="text-gray-400 line-through text-xs">${product.price.toLocaleString("es-AR")}</span>
+                        <span className="font-semibold text-gray-900">${product.salePrice.toLocaleString("es-AR")}</span>
+                      </>
+                    ) : (
+                      <span className="font-semibold text-gray-900">${product.price.toLocaleString("es-AR")}</span>
+                    )}
+                  </div>
+                </Link>
+              ))
+            )}
           </div>
         </section>
       </main>
